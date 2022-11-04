@@ -1,4 +1,4 @@
-# Ory Kratos + Keto Auth Method Plugin for HashiCorp Vault
+# Ory Kratos + Keto Auth Plugin for HashiCorp Vault
 
 This repository contains code for a HashiCorp Vault Auth Plugin that authenticates with Ory Kratos and Keto APIs.
 
