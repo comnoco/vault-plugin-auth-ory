@@ -1,6 +1,6 @@
 # Ory Kratos + Keto Auth Plugin for HashiCorp Vault
 
-This repository contains code for a HashiCorp Vault Auth Plugin that authenticates with Ory Kratos and Keto APIs.
+This repository contains code for a [HashiCorp Vault](https://github.com/hashicorp/vault) Auth [Plugin](https://developer.hashicorp.com/vault/docs/plugins) that authenticates with [Ory Kratos](https://github.com/ory/kratos) and [Ory Keto](https://github.com/ory/keto) APIs.
 
 ## Setup
 
@@ -38,13 +38,49 @@ you use the published checksums to verify integrity.
       -plugin-name="vault-plugin-auth-ory" plugin
   ```
 
+## Development Setup
+
+1. Build the plugin for your platform:
+
+  ```sh
+  $ make darwin/arm64
+  ```
+
+  or build for all platforms:
+
+  ```sh
+  $ make build
+  ```
+
+1. Start a Vault server in dev mode pointing to the plugin directory:
+
+  ```sh
+  $ make start
+  ```
+
+1. Enable the plugin in Vault:
+
+  ```sh
+  $ make enable
+  ```
+
+1. Authenticate with the plugin:
+
+  ```sh
+  $ vault write auth/ory/login \
+namespace=workspace \
+object=c5cc3e28-e3c3-45ca-be86-a0a55953bfca \
+relation=editor \
+kratos_session_cookie=kratos_session_cookie=MTY2NzgyMjg2M3xBYVJxa2hmNFlOOFAyZnc3U3VidnZKd1A0VmdyWFgyU3ozbUNvRG4zeC1oNU1DS3Z6dkc1ODllTHdua0s5aFdpcW1ZZ0pveVNBVVM3ZXBIRWdQdlJGWXN0aS1iVU5tenVFbUw1WE1QNDRVcms5eWZZRk52R3dOdTJKLVcxYVlFWFU4ajNFUmc0bnc9PXyq29KzMQjNDdZLeJAuNLUBeU1g1-iD7l31nahltn4mZg==
+  ```
+
 ## Authenticating with Ory Kratos and Keto
 
 To authenticate, the user supplies a valid Ory Kratos session cookie, along with the namespace,
 object, and relation to check against Keto.
 
 ```sh
-$ vault write auth/ory/login namespace=[namespace] object=[object] relation=[relation] kratos_session_cookie=kratos_session_cookie=[...]
+$ vault write auth/ory/login namespace=[namespace] object=[object] relation=[relation] kratos_session_cookie=[full kratos_session_cookie=[...] string]
 ```
 
 The response will be a standard auth response with some token metadata:
@@ -54,15 +90,11 @@ Key                     Value
 --------------------------------
 token                   [token]
 token_accessor          [accessor]
-token_duration          1h
-token_renewable         true
-token_policies          ["default" "secret/[namespace]/[object]"]
+token_duration          [TTL]
+token_renewable         false
+token_policies          ["default" "[namespace]_[object]"]
 identity_policies       []
-policies                ["default" "secret/[namespace]/[object]"]
-token_meta_namespace    [namespace]
-token_meta_object       [object]
-token_meta_relation     [relation]
-token_meta_subject      [kratos user ID]
+policies                ["default" "[namespace]_[object]"]
 ```
 
 ## License
