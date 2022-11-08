@@ -18,15 +18,16 @@ import (
 const (
 	// pathLoginSynopsis is used to generate the help text for the login path.
 	pathLoginSynopsis = `
-  Authenticates an RAM entity with Vault.
-  `
+Authenticates Ory Kratos users with Vault and authorises a policy with Keto.
+`
 
 	// pathLoginDesc is used to generate the help text for the login path.
 	pathLoginDescription = `
-  Authenticate AliCloud entities using an arbitrary RAM principal.
-  RAM principals are authenticated by processing a signed sts:GetCallerIdentity
-  request and then parsing the response to see who signed the request.
-  `
+Authenticate Ory Kratos identities using a Kratos session cookie.
+Authorise the identity with Keto using a namespace, object and relation.
+Resulting policy is named after the namespace and relation in the format
+namespace_relation.
+`
 )
 
 // NewPathLogin returns the path for the login endpoint.
