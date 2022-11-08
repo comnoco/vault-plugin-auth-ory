@@ -123,6 +123,12 @@ path "secret/metadata/{{identity.entity.metadata.namespace}}/{{identity.entity.m
 
 Being sure to replace `[auth plugin accessor]` with the accessor of the auth plugin found by running `vault auth list`.
 
+Alternatively, you can find the accessor by running the following command:
+
+```sh
+$ export MOUNT_ACCESSOR=$(vault auth list -format=json | jq -r '."ory/".accessor')
+```
+
 As we already know the namespace at this point, you can also simply use the path:
 
 `secret/data/[known namespace]/{{identity.entity.metadata.object}}*`
