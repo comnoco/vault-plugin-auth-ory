@@ -44,7 +44,7 @@ func (b *OryAuthBackend) getKratosClient(
 	kratosConfig.Debug = true
 	kratosConfig.Servers = kratos.ServerConfigurations{
 		kratos.ServerConfiguration{
-			URL:         "https://localhost/auth",
+			URL:         "https://localhost:4433",
 			Description: "Ory Kratos",
 			Variables:   map[string]kratos.ServerVariable{},
 		},

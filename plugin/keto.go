@@ -42,7 +42,7 @@ func (b *OryAuthBackend) getKetoClient(
 
 	// TODO (TW) support TLS
 	// conn, err := grpc.Dial(config.Keto.TransportConfig.Host, grpc.WithInsecure())
-	conn, err := grpc.Dial("127.0.0.1:4466", grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:4466", grpc.WithInsecure())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to keto")
 	}
