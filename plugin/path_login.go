@@ -97,6 +97,7 @@ func (b *OryAuthBackend) loginUpdateHandler(
 		return logical.ErrorResponse(err.Error()), nil
 	}
 
+	// TODO (TW) do we replace with List call and create policies for all relations?
 	allowed, err := b.checkRelation(ctx, req, namespace, object, relation, subject)
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
@@ -108,28 +109,39 @@ func (b *OryAuthBackend) loginUpdateHandler(
 		), nil
 	}
 
-	policy := strings.Join([]string{namespace, object}, "/")
+	policy := strings.Join([]string{namespace, relation}, "_")
 	policies := []string{policy}
 
-	res := &logical.Response{}
+	metadata := map[string]string{
+		"namespace": namespace,
+		"object":    object,
+		"relation":  relation,
+		"subject":   subject,
+	}
 
-	res.Auth = &logical.Auth{
-		Period: 1 * time.Hour,
-		Alias: &logical.Alias{
-			Name: "kratos-session",
-		},
-		Policies: policies,
-		Metadata: map[string]string{
-			"namespace": namespace,
-			"object":    object,
-			"relation":  relation,
-			"subject":   subject,
-		},
-		DisplayName: "kratos",
-		LeaseOptions: logical.LeaseOptions{
-			Renewable: true,
-			TTL:       1 * time.Hour,
-			MaxTTL:    1 * time.Hour,
+	internalData := map[string]interface{}{
+		"namespace": namespace,
+		"object":    object,
+		"relation":  relation,
+		"subject":   subject,
+	}
+
+	res := &logical.Response{
+		Auth: &logical.Auth{
+			Period: 1 * time.Hour,
+			Alias: &logical.Alias{
+				// Name:     "kratos-session-" + kratosSession.Id,
+				Name:     "ory-auth",
+				Metadata: metadata,
+			},
+			Policies:     policies,
+			InternalData: internalData,
+			DisplayName:  "kratos-keto",
+			LeaseOptions: logical.LeaseOptions{
+				Renewable: false,
+				TTL:       time.Until(*kratosSession.ExpiresAt),
+				MaxTTL:    1 * time.Hour, // TODO (TW) Map to config
+			},
 		},
 	}
 
