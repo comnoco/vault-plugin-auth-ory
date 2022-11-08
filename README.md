@@ -2,6 +2,14 @@
 
 This repository contains code for a [HashiCorp Vault](https://github.com/hashicorp/vault) Auth [Plugin](https://developer.hashicorp.com/vault/docs/plugins) that authenticates with [Ory Kratos](https://github.com/ory/kratos) and [Ory Keto](https://github.com/ory/keto) APIs.
 
+## Note
+
+This plugin in a WIP and is not ready for production use.
+
+Currently, the config portion of the plugin is temporarily hardcoded to localhost.
+
+This plugin will be completed within the next few days/weeks.
+
 ## Setup
 
 The setup guide assumes some familiarity with Vault and Vault's plugin
