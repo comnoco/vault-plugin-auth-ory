@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/vault/sdk/logical"
@@ -63,14 +62,6 @@ type TransportConfig struct {
 // readConfig reads the configuration from the storage.
 func (b *OryAuthBackend) readConfig(ctx context.Context, s logical.Storage) (*Config, error) {
 	b.Logger().Debug("reading configuration")
-
-	list, err := s.List(ctx, "config")
-	if err != nil {
-		b.Logger().Debug("error listing config from storage", "error", err)
-		return nil, err
-	}
-
-	fmt.Println("list", list)
 
 	entry, err := s.Get(ctx, "config")
 	if err != nil {
