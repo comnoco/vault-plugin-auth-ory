@@ -66,6 +66,7 @@ If 'relation' is not specified, login fails.`,
 	}
 }
 
+// loginUpdateHandler is the handler for the login path.
 func (b *OryAuthBackend) loginUpdateHandler(
 	ctx context.Context,
 	req *logical.Request,
