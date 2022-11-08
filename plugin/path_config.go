@@ -46,6 +46,7 @@ func (b *OryAuthBackend) readConfigHandler(
 	req *logical.Request,
 	data *framework.FieldData,
 ) (*logical.Response, error) {
+	// TODO (TW) https://developer.hashicorp.com/vault/docs/concepts/integrated-storage
 	config, err := b.readConfig(ctx, req.Storage)
 	if err != nil {
 		return nil, err
