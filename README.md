@@ -92,10 +92,32 @@ token                   [token]
 token_accessor          [accessor]
 token_duration          [TTL]
 token_renewable         false
-token_policies          ["default" "[namespace]_[object]"]
+token_policies          ["default" "[namespace]_[relation]"]
 identity_policies       []
-policies                ["default" "[namespace]_[object]"]
+policies                ["default" "[namespace]_[relation]"]
 ```
+
+## Policy Template
+
+When a token is successfully created, the plugin attach a policy that follows the naming schema of `[namespace]_[relation]`.
+
+You must then create a policy with that name in Vault that utilises the metadata stored in the alias. The following policy template will allow access to a KV secret at the path `secret/data/[namespace]/[object]*`:
+
+```hcl
+path "secret/data/{{identity.entity.aliases.[auth plugin accessor].metadata.namespace}}/{{identity.entity.aliases.[auth plugin accessor].metadata.object}}*" {
+  capabilities = ["create", "update", "read"]
+}
+
+path "secret/metadata/{{identity.entity.metadata.namespace}}/{{identity.entity.metadata.object}}*" {
+  capabilities = ["list"]
+}
+```
+
+Being sure to replace `[auth plugin accessor]` with the accessor of the auth plugin found by running `vault auth list`.
+
+As we already know the namespace at this point, you can also simply use the path:
+
+`secret/data/[known namespace]/{{identity.entity.metadata.object}}*`
 
 ## License
 
