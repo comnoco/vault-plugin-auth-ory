@@ -116,7 +116,7 @@ path "secret/data/{{identity.entity.aliases.[auth plugin accessor].metadata.name
   capabilities = ["create", "update", "read"]
 }
 
-path "secret/metadata/{{identity.entity.metadata.namespace}}/{{identity.entity.metadata.object}}*" {
+path "secret/metadata/{{identity.entity.aliases.[auth plugin accessor].metadata.namespace}}/{{identity.entity.aliases.[auth plugin accessor].metadata.object}}}*" {
   capabilities = ["list"]
 }
 ```
