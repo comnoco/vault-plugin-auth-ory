@@ -1,4 +1,2 @@
-api_addr     = "http://localhost:8200"
-ui           = true
-
-kratos_auth_url = "https://localhost:4434"
+keto_url = "localhost:4466"
+kratos_url = "https://localhost:4434"

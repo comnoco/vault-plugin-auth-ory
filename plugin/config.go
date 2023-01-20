@@ -11,7 +11,8 @@ import (
 
 // Config is the configuration for the plugin.
 type Config struct {
-	KratosAuthURL string `json:"kratos_auth_url"`
+	KratosURL string `json:"kratos_url"`
+	KetoURL   string `json:"keto_url"`
 	// TODO (TW) expose Kratos and Keto configuration options.
 	Kratos *KratosConfig `json:"kratos"          structs:"kratos" mapstructure:"kratos"`
 	Keto   *KetoConfig   `json:"keto"            structs:"keto"   mapstructure:"keto"`
@@ -91,7 +92,17 @@ func (b *OryAuthBackend) readConfig(ctx context.Context, s logical.Storage) (*Co
 }
 
 // configToKratosConfig converts the plugin configuration to the Kratos API client configuration.
-func configToKratosConfig(config *Config) *kratos.Configuration {
+func (b *OryAuthBackend) configToKratosConfig(config *Config) *kratos.Configuration {
+	if config == nil {
+		b.Logger().Error("Config nil")
+		return nil
+	}
+
+	if config.Kratos == nil {
+		b.Logger().Error("Kratos configuration missing in config")
+		return nil
+	}
+
 	kratosConfig := &kratos.Configuration{
 		Host:             config.Kratos.Host,
 		Scheme:           config.Kratos.Scheme,
@@ -125,7 +136,17 @@ func configToKratosConfig(config *Config) *kratos.Configuration {
 }
 
 // configToKetoConfig converts the plugin configuration to the Keto API client configuration.
-func configToKetoConfig(config *Config) *keto.TransportConfig {
+func (b *OryAuthBackend) configToKetoConfig(config *Config) *keto.TransportConfig {
+	if config == nil {
+		b.Logger().Error("Config nil")
+		return nil
+	}
+
+	if config.Keto == nil {
+		b.Logger().Error("Keto configuration missing in config")
+		return nil
+	}
+
 	if config.Keto.TransportConfig == nil {
 		return nil
 	}

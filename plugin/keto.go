@@ -31,18 +31,18 @@ func (b *OryAuthBackend) getKetoClient(
 	b.Logger().Debug("could not find existing keto client, creating new one")
 
 	// TODO (TW) fix config
-	// b.Logger().Debug("reading config")
+	b.Logger().Debug("reading config")
 
-	// config, err := b.readConfig(ctx, s)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	config, err := b.readConfig(ctx, s)
+	if err != nil {
+		return nil, err
+	}
 
 	b.Logger().Debug("creating keto client")
 
 	// TODO (TW) support TLS
 	// conn, err := grpc.Dial(config.Keto.TransportConfig.Host, grpc.WithInsecure())
-	conn, err := grpc.Dial("localhost:4466", grpc.WithInsecure())
+	conn, err := grpc.Dial(config.KetoURL, grpc.WithInsecure())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to keto")
 	}

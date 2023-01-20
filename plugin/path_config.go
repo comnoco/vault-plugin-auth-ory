@@ -17,12 +17,21 @@ const (
 
 var configFields map[string]*framework.FieldSchema = map[string]*framework.FieldSchema{
 	// TODO (TW) Add fields for configuring the Ory services.
-	"kratos_auth_url": {
+	"kratos_url": {
 		Type:        framework.TypeString,
-		Description: "Kratos authentication URL",
+		Description: "Kratos URL",
 		Required:    true,
 		DisplayAttrs: &framework.DisplayAttributes{
 			Name:      "Kratos URL",
+			Sensitive: false,
+		},
+	},
+	"keto_url": {
+		Type:        framework.TypeString,
+		Description: "Keto URL",
+		Required:    true,
+		DisplayAttrs: &framework.DisplayAttributes{
+			Name:      "Keto URL",
 			Sensitive: false,
 		},
 	},
@@ -63,7 +72,8 @@ func (b *OryAuthBackend) readConfigHandler(
 
 	res := &logical.Response{
 		Data: map[string]interface{}{
-			"kratos_auth_url": config.KratosAuthURL,
+			"kratos_url": config.KratosURL,
+			"keto_url":   config.KetoURL,
 		},
 	}
 
@@ -90,9 +100,14 @@ func (b *OryAuthBackend) updateConfigHandler(
 		config = &Config{}
 	}
 
-	val, ok = data.GetOk("kratos_auth_url")
+	val, ok = data.GetOk("kratos_url")
 	if ok {
-		config.KratosAuthURL = val.(string)
+		config.KratosURL = val.(string)
+	}
+
+	val, ok = data.GetOk("keto_url")
+	if ok {
+		config.KetoURL = val.(string)
 	}
 
 	entry, err := logical.StorageEntryJSON("config", config)
