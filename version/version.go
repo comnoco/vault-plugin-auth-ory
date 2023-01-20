@@ -8,5 +8,6 @@ var (
 	Name      string
 	GitCommit string
 
-	HumanVersion = fmt.Sprintf("%s v%s (%s)", Name, Version, GitCommit)
+	HumanVersion   = fmt.Sprintf("%s v%s (%s)", Name, Version, GitCommit)
+	RunningVersion = fmt.Sprintf("v%s", Version)
 )

@@ -4,12 +4,12 @@ import (
 	"context"
 	"sync"
 
+	"github.com/comnoco/vault-plugin-auth-ory/version"
+
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
-
 	keto "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 	kratos "github.com/ory/kratos-client-go"
-
 	"google.golang.org/grpc"
 )
 
@@ -55,9 +55,10 @@ func NewBackend() *OryAuthBackend {
 	b := &OryAuthBackend{}
 
 	b.Backend = &framework.Backend{
-		BackendType:  logical.TypeCredential,
-		Invalidate:   b.invalidateHandler,
-		PeriodicFunc: b.periodicHandler,
+		RunningVersion: version.RunningVersion,
+		BackendType:    logical.TypeCredential,
+		Invalidate:     b.invalidateHandler,
+		PeriodicFunc:   b.periodicHandler,
 		// AuthRenew:    b.authRenewHandler,
 		Help: help,
 		PathsSpecial: &logical.Paths{

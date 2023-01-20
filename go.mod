@@ -9,6 +9,7 @@ require (
 	github.com/ory/keto-client-go v0.5.2
 	github.com/ory/keto/proto v0.10.0-alpha.0
 	github.com/ory/kratos-client-go v0.10.1
+	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.49.0
 )
 
@@ -61,7 +62,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.1.2 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

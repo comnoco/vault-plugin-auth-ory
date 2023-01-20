@@ -1,5 +1,9 @@
 bin/
 vendor/
+config/config.hcl
+config/config.json
+config/config.yaml
+config/config.yml
 
 # mac os
 .DS_Store

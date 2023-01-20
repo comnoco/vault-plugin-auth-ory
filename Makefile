@@ -178,7 +178,10 @@ _sign:
 .PHONY: _sign
 
 start:
-	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug
+	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug -config=./config/config.hcl
+
+start-tls:
+	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug -config=./config/config.hcl -dev-tls
 
 enable:
 	vault auth enable -path=ory vault-plugin-auth-ory

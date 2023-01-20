@@ -17,16 +17,21 @@ const (
 
 var configFields map[string]*framework.FieldSchema = map[string]*framework.FieldSchema{
 	// TODO (TW) Add fields for configuring the Ory services.
-	// "kratos_auth_url": {
-	// 	Type:        framework.TypeString,
-	// 	Description: "Kratos authentication URL",
-	// },
+	"kratos_auth_url": {
+		Type:        framework.TypeString,
+		Description: "Kratos authentication URL",
+		Required:    true,
+		DisplayAttrs: &framework.DisplayAttributes{
+			Name:      "Kratos URL",
+			Sensitive: false,
+		},
+	},
 }
 
 // NewPathConfig creates a new path for configuring the backend.
 func NewPathConfig(b *OryAuthBackend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern: "config",
 			Fields:  configFields,
 			Callbacks: map[logical.Operation]framework.OperationFunc{
@@ -85,7 +90,7 @@ func (b *OryAuthBackend) updateConfigHandler(
 		config = &Config{}
 	}
 
-	val, ok = data.GetOk("kratos_url")
+	val, ok = data.GetOk("kratos_auth_url")
 	if ok {
 		config.KratosAuthURL = val.(string)
 	}
