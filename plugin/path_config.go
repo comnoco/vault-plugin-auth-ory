@@ -17,21 +17,48 @@ const (
 
 var configFields map[string]*framework.FieldSchema = map[string]*framework.FieldSchema{
 	// TODO (TW) Add fields for configuring the Ory services.
-	"kratos_url": {
+	"debug": {
 		Type:        framework.TypeString,
-		Description: "Kratos URL",
+		Description: "Debug",
 		Required:    true,
 		DisplayAttrs: &framework.DisplayAttributes{
-			Name:      "Kratos URL",
+			Name:      "Debug",
 			Sensitive: false,
 		},
 	},
-	"keto_url": {
+	"keto_host": {
 		Type:        framework.TypeString,
 		Description: "Keto URL",
 		Required:    true,
 		DisplayAttrs: &framework.DisplayAttributes{
 			Name:      "Keto URL",
+			Sensitive: false,
+		},
+	},
+	"kratos_host": {
+		Type:        framework.TypeString,
+		Description: "Kratos Host",
+		Required:    true,
+		DisplayAttrs: &framework.DisplayAttributes{
+			Name:      "Kratos Host",
+			Sensitive: false,
+		},
+	},
+	"kratos_scheme": {
+		Type:        framework.TypeString,
+		Description: "Kratos Scheme",
+		Required:    true,
+		DisplayAttrs: &framework.DisplayAttributes{
+			Name:      "Kratos Scheme",
+			Sensitive: false,
+		},
+	},
+	"kratos_desc": {
+		Type:        framework.TypeString,
+		Description: "Kratos Description",
+		Required:    true,
+		DisplayAttrs: &framework.DisplayAttributes{
+			Name:      "Kratos Description",
 			Sensitive: false,
 		},
 	},
@@ -72,8 +99,8 @@ func (b *OryAuthBackend) readConfigHandler(
 
 	res := &logical.Response{
 		Data: map[string]interface{}{
-			"kratos_url": config.KratosURL,
-			"keto_url":   config.KetoURL,
+			"kratos_host": config.KratosHost,
+			"keto_host":   config.KetoHost,
 		},
 	}
 
@@ -100,14 +127,29 @@ func (b *OryAuthBackend) updateConfigHandler(
 		config = &Config{}
 	}
 
-	val, ok = data.GetOk("kratos_url")
+	val, ok = data.GetOk("debug")
 	if ok {
-		config.KratosURL = val.(string)
+		config.Debug = val.(string) == "true"
 	}
 
-	val, ok = data.GetOk("keto_url")
+	val, ok = data.GetOk("kratos_host")
 	if ok {
-		config.KetoURL = val.(string)
+		config.KratosHost = val.(string)
+	}
+
+	val, ok = data.GetOk("kratos_scheme")
+	if ok {
+		config.KratosScheme = val.(string)
+	}
+
+	val, ok = data.GetOk("kratos_desc")
+	if ok {
+		config.KratosDesc = val.(string)
+	}
+
+	val, ok = data.GetOk("keto_host")
+	if ok {
+		config.KetoHost = val.(string)
 	}
 
 	entry, err := logical.StorageEntryJSON("config", config)

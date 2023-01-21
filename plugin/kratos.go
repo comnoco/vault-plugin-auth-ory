@@ -36,21 +36,11 @@ func (b *OryAuthBackend) getKratosClient(
 
 		return nil, err
 	}
+
+	b.Logger().Debug("creating kratos config")
 	kratosConfig := b.configToKratosConfig(config)
 
 	b.Logger().Debug("creating kratos client")
-
-	kratosConfig = kratos.NewConfiguration()
-	kratosConfig.Debug = true
-	kratosConfig.Servers = kratos.ServerConfigurations{
-		kratos.ServerConfiguration{
-			URL:         config.KratosURL,
-			Description: "Ory Kratos",
-			Variables:   map[string]kratos.ServerVariable{},
-		},
-	}
-	kratosConfig.HTTPClient = &http.Client{}
-
 	b.kratosClient = kratos.NewAPIClient(kratosConfig)
 
 	b.Logger().Debug("returning new kratos client", "url", kratosConfig.Servers[0].URL)

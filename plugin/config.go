@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/vault/sdk/logical"
@@ -11,8 +12,13 @@ import (
 
 // Config is the configuration for the plugin.
 type Config struct {
-	KratosURL string `json:"kratos_url"`
-	KetoURL   string `json:"keto_url"`
+	Debug               bool              `json:"debug,omitempty"`
+	KetoHost            string            `json:"keto_host"`
+	KratosHost          string            `json:"kratos_host"`
+	KratosScheme        string            `json:"kratos_scheme"`
+	KratosDesc          string            `json:"kratos_desc`
+	KratosDefaultHeader map[string]string `json:"kratos_default_header`
+	KratosUserAgent     string            `json:"kratos_user_agent`
 	// TODO (TW) expose Kratos and Keto configuration options.
 	Kratos *KratosConfig `json:"kratos"          structs:"kratos" mapstructure:"kratos"`
 	Keto   *KetoConfig   `json:"keto"            structs:"keto"   mapstructure:"keto"`
@@ -98,39 +104,45 @@ func (b *OryAuthBackend) configToKratosConfig(config *Config) *kratos.Configurat
 		return nil
 	}
 
-	if config.Kratos == nil {
-		b.Logger().Error("Kratos configuration missing in config")
-		return nil
-	}
+	// if config.Kratos == nil {
+	// 	b.Logger().Error("Kratos configuration missing in config")
+	// 	return nil
+	// }
 
 	kratosConfig := &kratos.Configuration{
-		Host:             config.Kratos.Host,
-		Scheme:           config.Kratos.Scheme,
-		DefaultHeader:    config.Kratos.DefaultHeader,
-		UserAgent:        config.Kratos.UserAgent,
-		Debug:            config.Kratos.Debug,
-		Servers:          make(kratos.ServerConfigurations, 0),
+		Host:          config.KratosHost,
+		Scheme:        config.KratosScheme,
+		DefaultHeader: config.KratosDefaultHeader,
+		UserAgent:     config.KratosUserAgent,
+		Debug:         config.Debug,
+		Servers: kratos.ServerConfigurations{
+			kratos.ServerConfiguration{
+				URL:         fmt.Sprintf("%s://%s", config.KratosScheme, config.KratosHost),
+				Description: config.KratosDesc,
+				Variables:   map[string]kratos.ServerVariable{},
+			},
+		},
 		OperationServers: make(map[string]kratos.ServerConfigurations, 0),
-		HTTPClient:       config.Kratos.HTTPClient,
+		HTTPClient:       &http.Client{},
 	}
 
-	for _, server := range config.Kratos.Servers {
-		variables := make(map[string]kratos.ServerVariable)
+	// for _, server := range config.Kratos.Servers {
+	// 	variables := make(map[string]kratos.ServerVariable)
 
-		for _, variable := range server.Variables {
-			variables[variable.DefaultValue] = kratos.ServerVariable{
-				EnumValues:   variable.EnumValues,
-				DefaultValue: variable.DefaultValue,
-				Description:  variable.Description,
-			}
-		}
+	// 	for _, variable := range server.Variables {
+	// 		variables[variable.DefaultValue] = kratos.ServerVariable{
+	// 			EnumValues:   variable.EnumValues,
+	// 			DefaultValue: variable.DefaultValue,
+	// 			Description:  variable.Description,
+	// 		}
+	// 	}
 
-		kratosConfig.Servers = append(kratosConfig.Servers, kratos.ServerConfiguration{
-			URL:         server.URL,
-			Description: server.Description,
-			Variables:   variables,
-		})
-	}
+	// 	kratosConfig.Servers = append(kratosConfig.Servers, kratos.ServerConfiguration{
+	// 		URL:         server.URL,
+	// 		Description: server.Description,
+	// 		Variables:   variables,
+	// 	})
+	// }
 
 	return kratosConfig
 }
