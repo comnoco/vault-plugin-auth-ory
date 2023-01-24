@@ -99,7 +99,7 @@ func (b *OryAuthBackend) loginUpdateHandler(
 		return logical.ErrorResponse(err.Error()), nil
 	}
 
-	// TODO (TW) do we replace with List call and create policies for all relations?
+	// TODO do we replace with List call and create policies for all relations?
 	allowed, err := b.checkRelation(ctx, req, namespace, object, relation, subject)
 	if err != nil {
 		return logical.ErrorResponse(err.Error()), nil
@@ -128,11 +128,22 @@ func (b *OryAuthBackend) loginUpdateHandler(
 		"subject":   subject,
 	}
 
+	config, err := b.readConfig(ctx, req.Storage)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to fetch config")
+	}
+
+	var ttl time.Duration
+	if config.UseSessionExpiryTTL {
+		ttl = time.Until(*kratosSession.ExpiresAt)
+	} else {
+		ttl = time.Duration(config.TTLSeconds) * time.Second
+	}
+
 	res := &logical.Response{
 		Auth: &logical.Auth{
-			Period: 1 * time.Hour,
+			Period: ttl,
 			Alias: &logical.Alias{
-				// Name:     "kratos-session-" + kratosSession.Id,
 				Name:     "ory-auth",
 				Metadata: metadata,
 			},
@@ -141,8 +152,8 @@ func (b *OryAuthBackend) loginUpdateHandler(
 			DisplayName:  "kratos-keto",
 			LeaseOptions: logical.LeaseOptions{
 				Renewable: false,
-				TTL:       time.Until(*kratosSession.ExpiresAt),
-				MaxTTL:    1 * time.Hour, // TODO (TW) Map to config
+				TTL:       ttl,
+				MaxTTL:    time.Duration(config.MaxTTLSeconds) * time.Second,
 			},
 		},
 	}
@@ -169,14 +180,12 @@ func (b *OryAuthBackend) getKratosSession(
 
 	client, err := b.getKratosClient(ctx, req.Storage)
 	if err != nil {
-		return nil, errors.New("could not get Kratos client")
+		return nil, errors.Wrap(err, "could not get Kratos client")
 	}
-	b.Logger().Debug("got kratos client", "client", client)
 
 	session, _, err := b.validateSessionCookie(ctx, client, kratosSessionCookie)
 	if err != nil {
-		b.Logger().Error("error while trying to validate kratos session cookie", "err", err)
-		return nil, errors.New("could not validate kratos session cookie")
+		return nil, errors.Wrap(err, "could not validate kratos session cookie")
 	}
 
 	b.Logger().Debug("found kratos session", "session", session)
@@ -279,14 +288,11 @@ func (b *OryAuthBackend) checkRelation(
 		return false, errors.New("subject is empty")
 	}
 
-	b.Logger().Debug("getting keto client")
 	ketoClient, err := b.getKetoClient(ctx, req.Storage)
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, "failed to get keto client")
 	}
-	b.Logger().Debug("got keto client")
 
-	b.Logger().Debug("checking relation")
 	res, err := ketoClient.CheckServiceClient.Check(
 		ctx,
 		&keto.CheckRequest{
@@ -297,7 +303,7 @@ func (b *OryAuthBackend) checkRelation(
 		},
 	)
 	if err != nil {
-		return false, err
+		return false, errors.Wrap(err, "failed keto check")
 	}
 
 	return res.GetAllowed(), nil
