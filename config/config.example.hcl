@@ -1,5 +1,0 @@
-debug = "true"
-keto_host = "localhost:4466"
-kratos_host = "localhost:4434"
-kratos_scheme = "https"
-kratos_desc = "Ory Kratos"

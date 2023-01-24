@@ -1,0 +1,13 @@
+{
+  "use_session_expiry_ttl": true,
+  "ttl_seconds": 3600,
+  "max_ttl_seconds": "1h",
+  "keto_host": "localhost:4466",
+  "kratos_url": "https://localhost:4433",
+  "kratos_description": "Ory Kratos",
+  "kratos_user_agent": "Vault Plugin Auth Ory",
+  "kratos_default_header": {
+    "some_header": "some_value"
+  },
+  "kratos_debug": true
+}
