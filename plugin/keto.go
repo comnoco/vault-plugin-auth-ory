@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // getKetoClient returns a client for the Ory Keto API.
@@ -30,19 +31,17 @@ func (b *OryAuthBackend) getKetoClient(
 
 	b.Logger().Debug("could not find existing keto client, creating new one")
 
-	// TODO (TW) fix config
-	b.Logger().Debug("reading config")
-
 	config, err := b.readConfig(ctx, s)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not read keto config")
 	}
 
-	b.Logger().Debug("creating keto client")
+	b.Logger().Debug("creating keto client", "host", config.KetoHost)
 
-	// TODO (TW) support TLS
-	// conn, err := grpc.Dial(config.Keto.TransportConfig.Host, grpc.WithInsecure())
-	conn, err := grpc.Dial(config.KetoHost, grpc.WithInsecure())
+	conn, err := grpc.Dial(
+		config.KetoHost,
+		grpc.WithTransportCredentials(insecure.NewCredentials()), // TODO support tls
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to keto")
 	}

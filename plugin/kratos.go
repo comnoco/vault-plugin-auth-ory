@@ -27,17 +27,11 @@ func (b *OryAuthBackend) getKratosClient(
 
 	b.Logger().Debug("could not find existing kratos client, creating new one")
 
-	b.Logger().Debug("reading config")
-
-	// TODO (TW) fix config
 	config, err := b.readConfig(ctx, s)
 	if err != nil {
-		b.Logger().Error("failed to read config", "error", err)
-
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read config")
 	}
 
-	b.Logger().Debug("creating kratos config")
 	kratosConfig := b.configToKratosConfig(config)
 
 	b.Logger().Debug("creating kratos client")

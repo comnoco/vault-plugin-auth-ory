@@ -98,7 +98,7 @@ func (b *OryAuthBackend) invalidateHandler(_ context.Context, key string) {
 
 // periodicHandler is called periodically to perform any backend tasks.
 func (b *OryAuthBackend) periodicHandler(ctx context.Context, req *logical.Request) error {
-	// TODO (TW) implement periodic handler (not necessarily a health check like below)
+	// TODO implement periodic handler (not necessarily a health check like below)
 
 	// b.Logger().Debug("running periodic healthCheck")
 
