@@ -179,19 +179,24 @@ _sign:
 
 # starts vault in dev mode with the correct plugin dir
 start:
-	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug -config=./config/config.hcl
+	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug
 
-start-tls:
-	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug -config=./config/config.hcl -dev-tls
-
-# starts vault in dev mode with the correct plugin dir
+# starts vault in dev mode with the correct plugin dir and tls enabled
 start-tls:
 	vault server -dev -dev-root-token-id=root -dev-plugin-dir=./bin/${GOOS}_${GOARCH} -log-level=debug -dev-tls=true
 
-# enabls the auth plugin under the 'ory' path
+# enables the auth plugin under the 'ory' path
 enable:
 	vault auth enable -path=ory vault-plugin-auth-ory
+
+# writes an example config to vault
+configs:
+	vault write auth/ory/config @config/config.example.json
 
 # returns the unique accessor of the auth plugin
 accessor:
 	vault auth list -format=json | jq -r '."ory/".accessor'
+
+# writes an example auth to vault (update the session cookie and relations)
+write:
+	vault write auth/ory/login namespace=Files object=my/protected/file.txt relation=view kratos_session_cookie=ory_kratos_session=[kratos session cookie string here]
