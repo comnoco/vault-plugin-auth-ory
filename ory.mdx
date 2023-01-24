@@ -1,0 +1,198 @@
+---
+layout: api
+page_title: Ory Kratos/Keto - Auth Methods - HTTP API
+description: |-
+  This is the API documentation for the Vault Ory authentication method.
+---
+
+# Ory Auth Method (API)
+
+This is the API documentation for the Vault Ory auth method.
+
+This documentation assumes the plugin method is mounted at the
+`/auth/ory` path in Vault. Since it is possible to enable auth methods
+at any location, please update your API calls accordingly.
+
+## Configure
+
+Configures the settings required for the plugin to perform API calls
+to Ory Kratos and Keto. These configs will be used to query Kratos to
+validate a user session cookie, and Keto to authorise a user against a
+relation tuple.
+
+| Method | Path               |
+| :----- | :----------------- |
+| `POST` | `/auth/ory/config` |
+
+### Parameters
+
+- `ttl_seconds` `(int: 3600)` - A number of seconds, or Go duration string, that determines the TTL of a token.
+
+- `max_ttl_seconds` `(int: 3600)` - A number of seconds, or Go duration string, that determines the max TTL of a token.
+
+- `use_session_expiry_ttl` `(bool: false)` - A flag that determines whether the session expiry is used as the TTL.
+
+- `keto_host` `(string: "")` - A JSON string containing the host address of an Ory Keto instance.
+
+- `kratos_url` `(string: "")` - A JSON string containing the full URL of an Ory Kratos instance.
+
+- `kratos_description` `(string: "")` - A JSON string containing the description of the Ory Kratos instance.
+
+- `kratos_user_agent` `(string: "")` - A JSON string containing the user agent used when making Kratos requests.
+
+- `kratos_default_header` `(map[string]string: {})` - A JSON object that maps header name strings to
+  header values to be sent with every request
+
+- `kratos_debug` `(bool: false)` - A JSON boolean that determines whether or not Kratos should be debugged.
+
+
+
+### Sample Payload
+
+```json
+{
+  "use_session_expiry_ttl": true,
+  "ttl_seconds": 3600,
+  "max_ttl_seconds": "1h",
+  "keto_host": "localhost:4466",
+  "kratos_url": "https://localhost:4433",
+  "kratos_description": "Ory Kratos",
+  "kratos_user_agent": "Vault Plugin Auth Ory",
+  "kratos_default_header": {
+    "some_header": "some_value"
+  },
+  "kratos_debug": true
+}
+```
+
+### Sample Request
+
+```shell-session
+$ curl \
+    --header "X-Vault-Token: ..." \
+    --request POST \
+    --data @config.json \
+    http://127.0.0.1:8200/v1/auth/ory/config
+```
+
+## Read Config
+
+Returns the configuration, if any, including credentials.
+
+| Method | Path               |
+| :----- | :----------------- |
+| `GET`  | `/auth/ory/config` |
+
+### Sample Request
+
+```shell-session
+$ curl \
+    --header "X-Vault-Token: ..." \
+    http://127.0.0.1:8200/v1/auth/ory/config
+```
+
+### Sample Response
+
+```json
+{
+  "data": {
+    "use_session_expiry_ttl": true,
+    "ttl_seconds": 3600,
+    "max_ttl_seconds": 3600,
+    "keto_host": "localhost:4466",
+    "kratos_url": "https://localhost:4433",
+    "kratos_description": "Ory Kratos",
+    "kratos_user_agent": "Vault Plugin Auth Ory",
+    "kratos_default_header": {
+      "some_header": "some_value"
+    },
+    "kratos_debug": true
+  }
+}
+```
+
+## Login
+
+Login to retrieve a Vault token. This endpoint takes a Kratos session cookie and a Keto
+relation tuple (namespace, object, relation) for some resource. It verifies the session cookie
+with Kratos to authenticate that subject and then authorizes the subject for the given
+resource with Keto.
+
+| Method | Path              |
+| :----- | :---------------- |
+| `POST` | `/auth/ory/login` |
+
+### Sample Payload
+
+- `kratos_session_cookie` `(string: <required>)` - The session cookie string provided by Ory Kratos (default: `ory_kratos_session=...`).
+
+- `namespace` `(string: <required>)` - The namespace of the resource being accessed
+
+- `object` `(string: <required>)` - The object being accessed (often a UUID).
+
+- `relation` `(string: <required>)` - The relation being checked against the object being accessed.
+
+### Sample Payload
+
+```json
+{
+  "kratos_session_cookie": "ory_kratos_session=MTY3NDQ5...",
+  "namespace": "Files",
+  "object": "my/protected/file.txt",
+  "relation": "view"
+}
+```
+
+### Sample Request
+
+```shell-session
+$ curl \
+    --request POST \
+    --data @payload.json \
+    http://127.0.0.1:8200/v1/auth/ory/login
+```
+
+### Sample Response
+
+```json
+{
+  "auth": {
+    "client_token": "f33f8c72-924e-11f8-cb43-ac59d697597c",
+    "accessor": "0e9e354a-520f-df04-6867-ee81cae3d42d",
+    "policies": ["default", "Files_view"],
+    "metadata": {
+      "role": "my-role",
+    },
+    "lease_duration": 2764800,
+    "renewable": true
+  }
+}
+```
+
+## Policy
+
+Once a successful auth request is made, the token returned is given a Vault policy that matches the
+name of `[namespace]_[relation]` (e.g. `Files_view`). Policies that match all combinations of namespace/relations
+can be added to allow access to secrets based on Keto relation tuples. The object is stored in the token alias
+metadata, and can be used within the policy to grant access to a specific path programmatically.
+
+The following policy will allow access to a secret for a given namespace/object/relation:
+
+```hcl
+path "secret/data/{{identity.entity.aliases.[auth plugin accessor].metadata.namespace}}/{{identity.entity.aliases.[auth plugin accessor].metadata.object}}*" {
+  capabilities = ["create", "update", "read"]
+}
+
+path "secret/metadata/{{identity.entity.aliases.[auth plugin accessor].metadata.namespace}}/{{identity.entity.aliases.[auth plugin accessor].metadata.object}}}*" {
+  capabilities = ["list"]
+}
+```
+
+Simply replace `[auth plugin accessor]` with the unique plugin accessor, which can be found by running:
+
+`vault auth list -format=json | jq -r '."ory/".accessor'` (or `make accessor`).
+
+
+[Ory]: https://ory.sh/
+[Ory Kratos]: https://www.ory.sh/docs/kratos
+[Ory Keto]: https://www.ory.sh/docs/keto
