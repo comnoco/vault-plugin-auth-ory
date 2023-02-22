@@ -131,16 +131,16 @@ When a token is successfully created, the plugin attach a policy that follows th
 You must then create a policy with that name in Vault that utilises the metadata stored in the alias. The following policy template will allow access to a KV secret at the path `secret/data/[namespace]/[object]*`:
 
 ```hcl
-path "secret/data/{{identity.entity.aliases.[auth plugin accessor].metadata.namespace}}/{{identity.entity.aliases.[auth plugin accessor].metadata.object}}*" {
+path "secret/data/{{identity.entity.aliases.auth_vault-plugin-auth-ory_e40b77a0.metadata.object}}*" {
   capabilities = ["create", "update", "read"]
 }
 
-path "secret/metadata/{{identity.entity.aliases.[auth plugin accessor].metadata.namespace}}/{{identity.entity.aliases.[auth plugin accessor].metadata.object}}}*" {
+path "secret/metadata/{{identity.entity.aliases.auth_vault-plugin-auth-ory_e40b77a0.metadata.object}}/" {
   capabilities = ["list"]
 }
 ```
 
-Being sure to replace `[auth plugin accessor]` with the accessor of the auth plugin found by running `vault auth list`.
+Being sure to replace `auth_vault-plugin-auth-ory_e40b77a0` with the accessor of the auth plugin found by running `vault auth list`.
 
 Alternatively, you can find the accessor by running the following command:
 
