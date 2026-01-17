@@ -144,7 +144,7 @@ func (b *OryAuthBackend) loginUpdateHandler(
 		Auth: &logical.Auth{
 			Period: ttl,
 			Alias: &logical.Alias{
-				Name:     "ory-auth",
+				Name:     kratosSession.Identity.Id,
 				Metadata: metadata,
 			},
 			Policies:     policies,
